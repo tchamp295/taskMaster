@@ -5,10 +5,17 @@ import Task from "../models/Task.js";
 
 const router = express.Router();
 
-// Get all tasks for a user
+// Get all tasks for a user with optional filtering
 router.get("/", auth, async (req, res) => {
   try {
-    const tasks = await Task.find({ user: req.userId });
+    const { priority } = req.query;
+    const query = { user: req.userId };
+
+    if (priority) {
+      query.priority = priority;
+    }
+
+    const tasks = await Task.find(query);
     res.json(tasks);
   } catch (error) {
     res.status(500).json({ message: "Server error" });
@@ -64,27 +71,6 @@ router.delete("/:id", auth, async (req, res) => {
     }
 
     res.json({ message: "Task deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-// Filter tasks
-router.get("/filter", auth, async (req, res) => {
-  try {
-    const { priority, deadline } = req.query;
-    const query = { user: req.userId };
-
-    if (priority) {
-      query.priority = priority;
-    }
-
-    if (deadline) {
-      query.deadline = { $lte: new Date(deadline) };
-    }
-
-    const tasks = await Task.find(query);
-    res.json(tasks);
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
