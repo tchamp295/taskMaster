@@ -82,4 +82,19 @@ router.post("/login", async (req, res) => {
   }
 });
 
+router.post("/refresh-token", async (req, res) => {
+  try {
+    const oldToken = req.body.token;
+    const decoded = jwt.verify(oldToken, process.env.JWT_SECRET);
+
+    // Generate new token
+    const newToken = jwt.sign({ id: decoded.id }, process.env.JWT_SECRET, {
+      expiresIn: "24h",
+    });
+
+    res.json({ token: newToken });
+  } catch (error) {
+    res.status(401).json({ message: "Invalid token" });
+  }
+});
 export default router;
